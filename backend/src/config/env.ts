@@ -36,6 +36,7 @@ export const env = {
     endpoint: optional("R2_ENDPOINT", ""),
   },
   maxUploadBytes: Number(optional("MAX_UPLOAD_BYTES", String(50 * 1024 * 1024))),
+  maxStorageBytes: Number(optional("MAX_STORAGE_BYTES", String(1024 * 1024 * 1024))),
   recycleRetentionDays: Number(optional("RECYCLE_RETENTION_DAYS", "30")),
   presignExpiresSeconds: Number(optional("PRESIGN_EXPIRES_SECONDS", "120")),
 };

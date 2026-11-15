@@ -8,6 +8,7 @@ import { Subject } from "../models/Subject.js";
 import { Topic } from "../models/Topic.js";
 import { validateBody } from "../middleware/validate.js";
 import { assertAllowedFile, PREVIEWABLE } from "../services/files.js";
+import { assertWithinStorageQuota } from "../services/storageQuota.js";
 import { objectExists, presignDownload, presignUpload } from "../services/r2.js";
 import { trackActivity } from "../services/activity.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -59,6 +60,7 @@ materialsRouter.post(
   validateBody(initiateSchema),
   asyncHandler(async (req, res) => {
     const body = req.body as z.infer<typeof initiateSchema>;
+    await assertWithinStorageQuota(body.size);
     let extension: string;
     try {
       extension = assertAllowedFile(body.fileName, body.mimeType, body.size, env.maxUploadBytes);

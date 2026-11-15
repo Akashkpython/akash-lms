@@ -14,6 +14,7 @@ const schema = new Schema(
     remarks: { type: String, default: "", maxlength: 4000 },
     attachmentKey: { type: String, default: null },
     attachmentName: { type: String, default: null },
+    attachmentSize: { type: Number, default: 0 },
     favorite: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false, index: true },
     deletedAt: { type: Date, default: null },

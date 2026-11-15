@@ -12,6 +12,8 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ok } from "../utils/response.js";
 import { ownerAlive } from "../utils/query.js";
 import { assignmentStatus } from "../utils/sanitize.js";
+import { env } from "../config/env.js";
+import { getCurrentStorageUsageBytes } from "../services/storageQuota.js";
 
 const DAYS = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"] as const;
 
@@ -66,6 +68,7 @@ dashboardRouter.get(
       .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
       .slice(0, 8);
 
+    const [storageUsed] = await Promise.all([getCurrentStorageUsageBytes()]);
     ok(res, {
       cards: {
         materials,
@@ -74,6 +77,12 @@ dashboardRouter.get(
         pendingAssignments: pending,
         completedAssignments: completed,
         snippets,
+      },
+      storage: {
+        usedBytes: storageUsed,
+        maxBytes: env.maxStorageBytes,
+        usedFormatted: `${(storageUsed / (1024 * 1024)).toFixed(1)} MB`,
+        maxFormatted: `${Math.round(env.maxStorageBytes / (1024 * 1024))} MB`,
       },
       recent,
       upcoming,

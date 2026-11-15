@@ -5,6 +5,7 @@ import { env } from "../config/env.js";
 import { Assignment } from "../models/Assignment.js";
 import { validateBody } from "../middleware/validate.js";
 import { assertAllowedFile } from "../services/files.js";
+import { assertWithinStorageQuota } from "../services/storageQuota.js";
 import { objectExists, presignDownload, presignUpload } from "../services/r2.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { errors } from "../utils/ApiError.js";
@@ -27,6 +28,7 @@ assignmentFileRouter.post(
     const assignment = await Assignment.findOne({ _id: req.params.id, ...ownerAlive(req.user!.id) });
     if (!assignment) throw errors.notFound();
     const body = req.body as z.infer<typeof initiateSchema>;
+    await assertWithinStorageQuota(body.size);
     try {
       assertAllowedFile(body.fileName, body.mimeType, body.size, env.maxUploadBytes);
     } catch (error) {
@@ -38,6 +40,7 @@ assignmentFileRouter.post(
     const key = `assignments/${req.user!.id}/${assignment.id}/${randomUUID()}/${fileName}`;
     assignment.attachmentKey = key;
     assignment.attachmentName = fileName;
+    assignment.attachmentSize = body.size;
     await assignment.save();
     const uploadUrl = await presignUpload(key, body.mimeType);
     ok(res, { uploadUrl, fileName });

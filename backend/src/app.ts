@@ -47,6 +47,7 @@ export function createApp() {
         status: "ok",
         service: "akash-lms-api",
         storage: r2Configured() ? "configured" : "missing",
+        maxStorageBytes: env.maxStorageBytes,
       },
     });
   };
