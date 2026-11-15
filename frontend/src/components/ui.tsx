@@ -6,6 +6,7 @@ import {
   type SelectHTMLAttributes,
   type TextareaHTMLAttributes,
 } from "react";
+import { X } from "lucide-react";
 import { cn } from "../lib/cn";
 
 export function Button({
@@ -16,11 +17,14 @@ export function Button({
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition disabled:opacity-50",
-        variant === "primary" && "bg-[var(--accent)] text-[#070b14] hover:opacity-90",
-        variant === "ghost" && "hover:bg-white/5",
-        variant === "outline" && "border border-[var(--line)] hover:bg-white/5",
-        variant === "danger" && "bg-[var(--danger)] text-white",
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-150 disabled:pointer-events-none disabled:opacity-50 cursor-pointer",
+        variant === "primary" &&
+          "bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white shadow-md shadow-indigo-500/25 active:scale-[0.98]",
+        variant === "ghost" && "text-[var(--muted)] hover:text-[var(--text)] hover:bg-white/[0.07]",
+        variant === "outline" &&
+          "border border-[var(--line)] bg-white/[0.03] hover:bg-white/[0.08] hover:border-[var(--line-strong)] text-[var(--text)] active:scale-[0.98]",
+        variant === "danger" &&
+          "bg-red-500/15 border border-red-500/30 text-red-400 hover:bg-red-500/25 active:scale-[0.98]",
         className,
       )}
       {...props}
@@ -32,7 +36,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg)] px-3 py-2.5 text-sm outline-none ring-[var(--accent)] focus:ring-2",
+        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg-elev)]/70 px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--muted)]/60 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
         className,
       )}
       {...props}
@@ -44,7 +48,7 @@ export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTex
   return (
     <textarea
       className={cn(
-        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg)] px-3 py-2.5 text-sm outline-none ring-[var(--accent)] focus:ring-2",
+        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg-elev)]/70 px-3.5 py-2.5 text-sm text-[var(--text)] placeholder:text-[var(--muted)]/60 outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20",
         className,
       )}
       {...props}
@@ -56,7 +60,7 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
   return (
     <select
       className={cn(
-        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg)] px-3 py-2.5 text-sm outline-none",
+        "w-full rounded-xl border border-[var(--line)] bg-[var(--bg-elev)]/70 px-3.5 py-2.5 text-sm text-[var(--text)] outline-none transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 cursor-pointer",
         className,
       )}
       {...props}
@@ -67,34 +71,36 @@ export function Select({ className, children, ...props }: SelectHTMLAttributes<H
 }
 
 export function Card({ className, children }: { className?: string; children: ReactNode }) {
-  return <div className={cn("card p-5", className)}>{children}</div>;
+  return <div className={cn("card p-5 md:p-6", className)}>{children}</div>;
 }
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-medium tracking-tight">{title}</h1>
-        {subtitle ? <p className="mt-1 text-sm text-[var(--muted)]">{subtitle}</p> : null}
+        <h1 className="text-2xl md:text-3xl font-semibold tracking-tight text-[var(--text)]">{title}</h1>
+        {subtitle ? <p className="mt-1.5 text-sm text-[var(--muted)]">{subtitle}</p> : null}
       </div>
-      {actions}
+      {actions ? <div className="flex items-center gap-2.5">{actions}</div> : null}
     </div>
   );
 }
 
 export function EmptyState({ title, text, action }: { title: string; text: string; action?: ReactNode }) {
   return (
-    <Card className="flex flex-col items-center py-16 text-center">
-      <div className="mb-3 h-12 w-12 rounded-2xl border border-[var(--line)] bg-white/5" />
-      <h3 className="text-lg">{title}</h3>
-      <p className="mt-1 max-w-md text-sm text-[var(--muted)]">{text}</p>
-      {action ? <div className="mt-4">{action}</div> : null}
+    <Card className="flex flex-col items-center justify-center py-16 text-center">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[var(--line)] bg-gradient-to-br from-indigo-500/10 to-transparent">
+        <div className="h-6 w-6 rounded-lg bg-[var(--accent)]/20" />
+      </div>
+      <h3 className="text-lg font-medium text-[var(--text)]">{title}</h3>
+      <p className="mt-1.5 max-w-sm text-sm text-[var(--muted)]">{text}</p>
+      {action ? <div className="mt-5">{action}</div> : null}
     </Card>
   );
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("skeleton h-24 rounded-2xl", className)} />;
+  return <div className={cn("skeleton h-28 rounded-2xl", className)} />;
 }
 
 export function Modal({
@@ -116,15 +122,20 @@ export function Modal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
   if (!open) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <button className="absolute inset-0 bg-black/50" aria-label="Close dialog" onClick={onClose} />
-      <div className="card relative z-10 max-h-[90vh] w-full max-w-lg overflow-auto p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium">{title}</h2>
-          <button onClick={onClose} className="text-[var(--muted)] hover:text-[var(--text)]">
-            Close
+      <div className="absolute inset-0 bg-black/65 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="card relative z-10 max-h-[90vh] w-full max-w-lg overflow-auto border-white/[0.12] bg-[#0c1220]/95 p-6 shadow-2xl backdrop-blur-2xl">
+        <div className="mb-5 flex items-center justify-between border-b border-[var(--line)] pb-4">
+          <h2 className="text-lg font-semibold tracking-tight text-[var(--text)]">{title}</h2>
+          <button
+            onClick={onClose}
+            className="rounded-lg p-1 text-[var(--muted)] hover:bg-white/10 hover:text-[var(--text)] transition"
+          >
+            <X size={18} />
           </button>
         </div>
         {children}
@@ -150,8 +161,8 @@ export function ConfirmDialog({
 }) {
   return (
     <Modal open={open} title={title} onClose={onClose}>
-      <p className="text-sm text-[var(--muted)]">{text}</p>
-      <div className="mt-5 flex justify-end gap-2">
+      <p className="text-sm text-[var(--muted)] leading-relaxed">{text}</p>
+      <div className="mt-6 flex justify-end gap-2.5">
         <Button variant="ghost" onClick={onClose}>
           Cancel
         </Button>
@@ -163,15 +174,22 @@ export function ConfirmDialog({
   );
 }
 
-export function Badge({ children, tone = "default" }: { children: ReactNode; tone?: "default" | "ok" | "warn" | "bad" }) {
+export function Badge({
+  children,
+  tone = "default",
+}: {
+  children: ReactNode;
+  tone?: "default" | "ok" | "warn" | "bad" | "info";
+}) {
   return (
     <span
       className={cn(
-        "rounded-full px-2 py-0.5 text-xs",
-        tone === "default" && "bg-white/8 text-[var(--muted)]",
-        tone === "ok" && "bg-emerald-400/15 text-emerald-300",
-        tone === "warn" && "bg-amber-400/15 text-amber-300",
-        tone === "bad" && "bg-red-400/15 text-red-300",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium tracking-wide",
+        tone === "default" && "bg-white/[0.06] border border-white/[0.08] text-[var(--muted)]",
+        tone === "ok" && "bg-emerald-500/10 border border-emerald-500/25 text-emerald-400",
+        tone === "warn" && "bg-amber-500/10 border border-amber-500/25 text-amber-300",
+        tone === "bad" && "bg-rose-500/10 border border-rose-500/25 text-rose-400",
+        tone === "info" && "bg-indigo-500/10 border border-indigo-500/25 text-indigo-300",
       )}
     >
       {children}

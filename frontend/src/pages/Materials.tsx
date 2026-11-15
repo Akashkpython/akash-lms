@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Download, Eye, Star } from "lucide-react";
+import { Download, Eye, Star, UploadCloud, FileText } from "lucide-react";
 import { api, qs, type ItemResponse, type ListResponse } from "../lib/api";
 import { useTree } from "../hooks/useAcademic";
 import { Badge, Button, ConfirmDialog, EmptyState, Input, Modal, PageHeader, Select, Skeleton, Textarea } from "../components/ui";
@@ -156,7 +156,11 @@ export function MaterialsPage() {
       </div>
 
       <div
-        className={`mb-6 rounded-2xl border border-dashed p-8 text-center ${drag ? "border-[var(--accent)] bg-white/5" : "border-[var(--line)]"}`}
+        className={`mb-6 rounded-3xl border-2 border-dashed p-8 text-center transition-all duration-200 ${
+          drag
+            ? "border-indigo-500 bg-indigo-500/10 shadow-lg shadow-indigo-500/10"
+            : "border-[var(--line)] bg-[var(--bg-elev)]/40 hover:border-white/20"
+        }`}
         onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
         onDragLeave={() => setDrag(false)}
         onDrop={(e) => {
@@ -165,11 +169,23 @@ export function MaterialsPage() {
           if (e.dataTransfer.files.length) uploadFiles(e.dataTransfer.files);
         }}
       >
-        <p className="text-sm text-[var(--muted)]">Drag files here or use Upload. PDF, Office, images, zip, audio and video are supported.</p>
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm">
+          <UploadCloud size={24} />
+        </div>
+        <p className="text-sm font-semibold text-[var(--text)]">Drag & drop files here, or use the Upload button above</p>
+        <p className="mt-1 text-xs text-[var(--muted)]">PDF, slides, Word, images, zip, audio & code supported (max 50 MB / file)</p>
         {Object.entries(progress).map(([name, value]) => (
-          <div key={name} className="mx-auto mt-3 max-w-md text-left text-sm">
-            <div className="flex justify-between"><span>{name}</span><span>{value}%</span></div>
-            <div className="mt-1 h-2 rounded-full bg-white/10"><div className="h-2 rounded-full bg-[var(--accent)]" style={{ width: `${value}%` }} /></div>
+          <div key={name} className="mx-auto mt-4 max-w-md text-left text-xs">
+            <div className="flex justify-between font-medium text-[var(--text)] mb-1">
+              <span className="truncate pr-2">{name}</span>
+              <span className="text-indigo-400">{value}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-150"
+                style={{ width: `${value}%` }}
+              />
+            </div>
           </div>
         ))}
       </div>
@@ -179,41 +195,91 @@ export function MaterialsPage() {
         <EmptyState title="No materials yet" text="Create a semester, subject and topic, then upload files from home." />
       ) : null}
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="text-[var(--muted)]">
-            <tr>
-              <th className="py-2">File</th>
-              <th>Subject</th>
-              <th>Type</th>
-              <th>Size</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.data?.data.map((item) => (
-              <tr key={item._id} className="border-t border-[var(--line)]">
-                <td className="py-3">
-                  <div className="font-medium">{item.fileName}</div>
-                  <div className="text-xs text-[var(--muted)]">{item.description || item.topic?.name}</div>
-                </td>
-                <td>{item.subject?.name}</td>
-                <td><Badge>{item.extension.toUpperCase()}</Badge></td>
-                <td>{(item.size / 1024).toFixed(1)} KB</td>
-                <td className="space-x-2 whitespace-nowrap">
-                  <button onClick={() => access(item._id, true)}><Eye size={16} /></button>
-                  <button onClick={() => access(item._id)}><Download size={16} /></button>
-                  <button onClick={() => api(`/api/materials/${item._id}`, { method: "PATCH", body: JSON.stringify({ favorite: !item.favorite }) }).then(() => list.refetch())}>
-                    <Star size={16} fill={item.favorite ? "currentColor" : "none"} />
-                  </button>
-                  <Button variant="ghost" onClick={() => setEdit(item)}>Edit</Button>
-                  <Button variant="ghost" onClick={() => setRemoveId(item._id)}>Delete</Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {list.data && list.data.data.length > 0 && (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-left text-sm">
+              <thead className="border-b border-[var(--line)] bg-white/[0.02] text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+                <tr>
+                  <th className="px-5 py-3.5">File Name</th>
+                  <th className="px-4 py-3.5">Subject</th>
+                  <th className="px-4 py-3.5">Type</th>
+                  <th className="px-4 py-3.5">Size</th>
+                  <th className="px-5 py-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--line)]">
+                {list.data.data.map((item) => (
+                  <tr key={item._id} className="hover:bg-white/[0.03] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                          <FileText size={18} />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-medium text-[var(--text)] truncate">{item.fileName}</div>
+                          <div className="text-xs text-[var(--muted)] truncate">{item.description || item.topic?.name || "No description"}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-[var(--muted)]">{item.subject?.name || "General"}</td>
+                    <td className="px-4 py-3.5"><Badge tone="info">{item.extension.toUpperCase()}</Badge></td>
+                    <td className="px-4 py-3.5 text-xs text-[var(--muted)]">
+                      {item.size > 1024 * 1024
+                        ? `${(item.size / (1024 * 1024)).toFixed(1)} MB`
+                        : `${(item.size / 1024).toFixed(1)} KB`}
+                    </td>
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                      <div className="inline-flex items-center gap-1.5">
+                        <button
+                          onClick={() => access(item._id, true)}
+                          title="Preview"
+                          className="rounded-lg p-1.5 text-[var(--muted)] hover:bg-white/10 hover:text-[var(--text)] transition"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <button
+                          onClick={() => access(item._id)}
+                          title="Download"
+                          className="rounded-lg p-1.5 text-[var(--muted)] hover:bg-white/10 hover:text-[var(--text)] transition"
+                        >
+                          <Download size={16} />
+                        </button>
+                        <button
+                          onClick={() =>
+                            api(`/api/materials/${item._id}`, {
+                              method: "PATCH",
+                              body: JSON.stringify({ favorite: !item.favorite }),
+                            }).then(() => list.refetch())
+                          }
+                          title={item.favorite ? "Unstar" : "Star"}
+                          className={`rounded-lg p-1.5 transition ${
+                            item.favorite
+                              ? "text-amber-400"
+                              : "text-[var(--muted)] hover:text-amber-300 hover:bg-white/10"
+                          }`}
+                        >
+                          <Star size={16} fill={item.favorite ? "currentColor" : "none"} />
+                        </button>
+                        <Button variant="ghost" className="h-8 px-2.5 text-xs" onClick={() => setEdit(item)}>
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="h-8 px-2.5 text-xs text-rose-400 hover:bg-rose-500/10"
+                          onClick={() => setRemoveId(item._id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
       {list.data && list.data.meta.pages > 1 && (
         <div className="mt-4 flex gap-2">
           <Button variant="outline" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
